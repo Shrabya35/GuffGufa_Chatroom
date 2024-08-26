@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>guffgufa</title>
+    <script src="https://kit.fontawesome.com/10715cfae1.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+   <main>
+    <Nav class="navbar">
+        <div class="nav-left">
+            <i class="fa-brands fa-glide-g"></i>
+        <p>uff</p>
+        <i class="fa-brands fa-glide-g"></i>
+        <p>ufa</p>
+        <span>.com</span>
+        </div>
+        <div class="nav-right">
+            Chat Unlimited
+        </div>
+       </Nav>
+       <div class="chatbox-container">
+        <div class="room-input">
+            <input type="text" class="input-box" id="roomIdInput" placeholder="Enter Room ID">
+            <button id="joinRoomBtn">Join Room</button>
+        </div>
+        <div class="chatbox" id="chat"></div>
+       <div class="msg-input">
+        <input type="text" class="input-box" id="messageInput" placeholder="Enter message">
+        <button id="sendMessageBtn">Send</button>
+       </div>
+       </div>
+   </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
