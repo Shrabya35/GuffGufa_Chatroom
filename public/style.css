@@ -1,10 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Nunito Sans", sans-serif;
   width: 100%;
 }
 main {
@@ -40,7 +41,9 @@ main {
   color: #fe7b00;
 }
 .nav-right {
-  font-weight: bold;
+  font-weight: bolder;
+  display: inline-block;
+  transform: rotate(-5deg);
 }
 .chatbox-container {
   background: #eeeeee;
@@ -70,6 +73,7 @@ main {
 .input-box {
   width: 100%;
   padding: 0.75rem;
+  outline: none;
 }
 .msg-input,
 .room-input {
@@ -79,5 +83,14 @@ main {
 }
 button {
   cursor: pointer;
-  padding: 0.25rem 0.75rem 0.25rem 0.75rem;
+  padding: 0.5rem 0.75rem 0.5rem 0.75rem;
+  background: #66b5ff;
+  border: none;
+  outline: none;
+  font-weight: bold;
+  border-radius: 5px 2px 5px 2px;
+  color: #ffffff;
+}
+button:hover {
+  background: #4a9ad6;
 }
