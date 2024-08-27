@@ -9,6 +9,7 @@ const sendMessageBtn = document.getElementById("sendMessageBtn");
 const searchStrangerBtn = document.getElementById("searchStrangerBtn");
 
 let currentRoomId;
+let searchStrangerBtnToggle = true;
 
 joinRoomBtn.addEventListener("click", () => {
   const roomId = roomIdInput.value;
@@ -17,22 +18,31 @@ joinRoomBtn.addEventListener("click", () => {
   if (roomId && name) {
     currentRoomId = roomId;
     socket.emit("joinRoom", { roomId, name });
+    chat.innerHTML = " ";
     chat.innerHTML += `<p><strong>Joined room ${roomId} as ${name}</strong></p>`;
   }
 });
 
 searchStrangerBtn.addEventListener("click", () => {
-  socket.emit("searchStranger");
+  if (searchStrangerBtnToggle) {
+    socket.emit("searchStranger");
+    searchStrangerBtnToggle = false;
+    searchStrangerBtn.textContent = "Searching...";
+    chat.innerHTML = "";
+  }
 });
 
 socket.on("matched", (data) => {
   const { roomId } = data;
   currentRoomId = roomId;
+  searchStrangerBtnToggle = true;
   chat.innerHTML = "<p><strong>Matched with a stranger!</strong></p>";
+  searchStrangerBtn.textContent = "Search Stranger";
 });
 
 socket.on("searching", () => {
-  chat.innerHTML = "<p><em>Searching.....</em></p>";
+  chat.innerHTML +=
+    "<p><em>Searching for a stranger to chat with.....</em></p>";
 });
 
 sendMessageBtn.addEventListener("click", () => {
@@ -51,7 +61,9 @@ socket.on("userJoined", (data) => {
 });
 socket.on("userLeaved", (data) => {
   const { name } = data;
-  chat.innerHTML += `<p><em>${name} has left the room</em></p>`;
+  chat.innerHTML += `<p><em>${
+    name ? name : "stranger"
+  } has left the room</em></p>`;
 });
 socket.on("updateUserCount", (number) => {
   chat.innerHTML += `<p><em> (${number} members)</em></p>`;

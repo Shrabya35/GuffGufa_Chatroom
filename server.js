@@ -18,6 +18,7 @@ io.on("connection", (socket) => {
 
   socket.on("createRoom", (data) => {
     const { roomId, name } = data;
+    leaveCurrentRoom(socket);
     socket.join(roomId);
     socket.username = name;
     socket.roomId = roomId;
@@ -30,6 +31,7 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", (data) => {
     const { roomId, name } = data;
+    leaveCurrentRoom(socket);
     socket.join(roomId);
     socket.username = name;
     socket.roomId = roomId;
@@ -54,11 +56,13 @@ io.on("connection", (socket) => {
   socket.on("searchStranger", () => {
     console.log("User searching for a stranger");
     waitingQueue.push(socket);
+    leaveCurrentRoom(socket);
     socket.emit("searching");
     if (waitingQueue.length >= 2) {
       const user1 = waitingQueue.shift();
       const user2 = waitingQueue.shift();
       const roomId = `${user1.id}-${user2.id}`;
+      socket.strangerRoomId = roomId;
       user1.join(roomId);
       user2.join(roomId);
 
@@ -79,6 +83,24 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+function leaveCurrentRoom(socket) {
+  const { strangerRoomId, roomId, username } = socket;
+  if (roomId) {
+    socket.leave(roomId);
+    console.log(`${username} left room ${roomId}`);
+    socket.to(roomId).emit("userLeaved", { name: username });
+    const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+    io.to(roomId).emit("updateUserCount", numUsers);
+  }
+  if (strangerRoomId) {
+    socket.leave(strangerRoomId);
+    console.log(`${username} left room ${strangerRoomId}`);
+    socket.to(strangerRoomId).emit("userLeaved", { name: username });
+    const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+    io.to(strangerRoomId).emit("updateUserCount", numUsers);
+  }
+}
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
