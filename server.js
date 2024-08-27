@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "public")));
 
+let waitingQueue = [];
+
 io.on("connection", (socket) => {
   console.log("A user connected");
 
@@ -45,6 +47,26 @@ io.on("connection", (socket) => {
       senderId: socket.id,
       senderName: socket.username,
     });
+  });
+
+  //stranger wala ko logic
+
+  socket.on("searchStranger", () => {
+    console.log("User searching for a stranger");
+    waitingQueue.push(socket);
+    socket.emit("searching");
+    if (waitingQueue.length >= 2) {
+      const user1 = waitingQueue.shift();
+      const user2 = waitingQueue.shift();
+      const roomId = `${user1.id}-${user2.id}`;
+      user1.join(roomId);
+      user2.join(roomId);
+
+      user1.emit("matched", { roomId });
+      user2.emit("matched", { roomId });
+
+      console.log(`Users matched in room ${roomId}`);
+    }
   });
 
   socket.on("disconnect", () => {

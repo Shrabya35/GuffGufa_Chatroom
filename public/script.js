@@ -6,6 +6,7 @@ const joinRoomBtn = document.getElementById("joinRoomBtn");
 const chat = document.getElementById("chat");
 const messageInput = document.getElementById("messageInput");
 const sendMessageBtn = document.getElementById("sendMessageBtn");
+const searchStrangerBtn = document.getElementById("searchStrangerBtn");
 
 let currentRoomId;
 
@@ -18,6 +19,20 @@ joinRoomBtn.addEventListener("click", () => {
     socket.emit("joinRoom", { roomId, name });
     chat.innerHTML += `<p><strong>Joined room ${roomId} as ${name}</strong></p>`;
   }
+});
+
+searchStrangerBtn.addEventListener("click", () => {
+  socket.emit("searchStranger");
+});
+
+socket.on("matched", (data) => {
+  const { roomId } = data;
+  currentRoomId = roomId;
+  chat.innerHTML = "<p><strong>Matched with a stranger!</strong></p>";
+});
+
+socket.on("searching", () => {
+  chat.innerHTML = "<p><em>Searching.....</em></p>";
 });
 
 sendMessageBtn.addEventListener("click", () => {
@@ -45,6 +60,8 @@ socket.on("updateUserCount", (number) => {
 socket.on("receiveMessage", (data) => {
   const { message, senderId, senderName } = data;
   if (senderId !== socket.id) {
-    chat.innerHTML += `<p><strong class="chatbox-other">${senderName}:</strong> ${message}</p>`;
+    chat.innerHTML += `<p><strong class="chatbox-other">${
+      senderName ? senderName : "stranger"
+    }:</strong> ${message}</p>`;
   }
 });
