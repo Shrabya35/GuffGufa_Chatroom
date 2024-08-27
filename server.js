@@ -14,23 +14,47 @@ app.use(express.static(path.join(__dirname, "public")));
 io.on("connection", (socket) => {
   console.log("A user connected");
 
-  socket.on("createRoom", (roomId) => {
+  socket.on("createRoom", (data) => {
+    const { roomId, name } = data;
     socket.join(roomId);
-    console.log(`Room ${roomId} created and user joined`);
+    socket.username = name;
+    socket.roomId = roomId;
+    console.log(`Room ${roomId} created and ${name} joined`);
+
+    socket.to(roomId).emit("userJoined", { name });
+    const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+    io.to(roomId).emit("updateUserCount", numUsers);
   });
 
-  socket.on("joinRoom", (roomId) => {
+  socket.on("joinRoom", (data) => {
+    const { roomId, name } = data;
     socket.join(roomId);
-    console.log(`User joined room ${roomId}`);
+    socket.username = name;
+    socket.roomId = roomId;
+    console.log(`${name} joined room ${roomId}`);
+
+    socket.to(roomId).emit("userJoined", { name });
+    const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+    io.to(roomId).emit("updateUserCount", numUsers);
   });
 
   socket.on("sendMessage", (data) => {
     const { roomId, message } = data;
-    io.to(roomId).emit("receiveMessage", { message, senderId: socket.id });
+    io.to(roomId).emit("receiveMessage", {
+      message,
+      senderId: socket.id,
+      senderName: socket.username,
+    });
   });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
+    const { roomId, username } = socket;
+    if (roomId && username) {
+      console.log(`${username} disconnected from room ${roomId}`);
+      socket.to(roomId).emit("userLeaved", { name: username });
+      const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
+      io.to(roomId).emit("updateUserCount", numUsers);
+    }
   });
 });
 

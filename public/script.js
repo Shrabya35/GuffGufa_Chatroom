@@ -1,5 +1,6 @@
 const socket = io();
 
+const nameInput = document.getElementById("nameInput");
 const roomIdInput = document.getElementById("roomIdInput");
 const joinRoomBtn = document.getElementById("joinRoomBtn");
 const chat = document.getElementById("chat");
@@ -10,10 +11,12 @@ let currentRoomId;
 
 joinRoomBtn.addEventListener("click", () => {
   const roomId = roomIdInput.value;
-  if (roomId) {
+  const name = nameInput.value;
+
+  if (roomId && name) {
     currentRoomId = roomId;
-    socket.emit("joinRoom", roomId);
-    chat.innerHTML += `<p><strong>Joined room ${roomId}</strong></p>`;
+    socket.emit("joinRoom", { roomId, name });
+    chat.innerHTML += `<p><strong>Joined room ${roomId} as ${name}</strong></p>`;
   }
 });
 
@@ -27,9 +30,21 @@ sendMessageBtn.addEventListener("click", () => {
   }
 });
 
+socket.on("userJoined", (data) => {
+  const { name } = data;
+  chat.innerHTML += `<p><em>${name} has joined the room</em></p>`;
+});
+socket.on("userLeaved", (data) => {
+  const { name } = data;
+  chat.innerHTML += `<p><em>${name} has left the room</em></p>`;
+});
+socket.on("updateUserCount", (number) => {
+  chat.innerHTML += `<p><em> (${number} members)</em></p>`;
+});
+
 socket.on("receiveMessage", (data) => {
-  const { message, senderId } = data;
+  const { message, senderId, senderName } = data;
   if (senderId !== socket.id) {
-    chat.innerHTML += `<p><strong class="chatbox-other">Other:</strong> ${message}</p>`;
+    chat.innerHTML += `<p><strong class="chatbox-other">${senderName}:</strong> ${message}</p>`;
   }
 });
