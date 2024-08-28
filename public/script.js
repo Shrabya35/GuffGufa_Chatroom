@@ -45,7 +45,7 @@ socket.on("searching", () => {
     "<p><em>Searching for a stranger to chat with.....</em></p>";
 });
 
-sendMessageBtn.addEventListener("click", () => {
+function sendMessage() {
   const message = messageInput.value;
   if (message && currentRoomId) {
     socket.emit("sendMessage", { roomId: currentRoomId, message });
@@ -53,17 +53,29 @@ sendMessageBtn.addEventListener("click", () => {
     chat.innerHTML += `<p><strong class="chatbox-you">You:</strong> ${message}</p>`;
     messageInput.value = "";
   }
-});
+}
 
+sendMessageBtn.addEventListener("click", sendMessage);
+
+messageInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendMessage();
+  }
+});
 socket.on("userJoined", (data) => {
   const { name } = data;
   chat.innerHTML += `<p><em>${name} has joined the room</em></p>`;
 });
 socket.on("userLeaved", (data) => {
   const { name } = data;
-  chat.innerHTML += `<p><em>${
-    name ? name : "stranger"
-  } has left the room</em></p>`;
+  chat.innerHTML += `<p><em>${name} has left the room</em></p>`;
+});
+
+socket.on("strangerLeaved", () => {
+  chat.innerHTML += `<p><em>Stranger has disconnected</em></p>`;
+  chat.innerHTML +=
+    '<div><button id="searchStrangerBtn">New Chat</button></div>';
 });
 socket.on("updateUserCount", (number) => {
   chat.innerHTML += `<p><em> (${number} members)</em></p>`;

@@ -74,12 +74,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    const { roomId, username } = socket;
+    const { strangerRoomId, roomId, username } = socket;
     if (roomId && username) {
       console.log(`${username} disconnected from room ${roomId}`);
       socket.to(roomId).emit("userLeaved", { name: username });
       const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
       io.to(roomId).emit("updateUserCount", numUsers);
+    }
+    if (strangerRoomId) {
+      console.log(`${username} left room ${strangerRoomId}`);
+      socket.to(strangerRoomId).emit("strangerLeaved");
+      const numStrangerUsers =
+        io.sockets.adapter.rooms.get(strangerRoomId)?.size || 0;
+      io.to(strangerRoomId).emit("updateStrangerCount", numStrangerUsers);
     }
   });
 });
@@ -94,11 +101,15 @@ function leaveCurrentRoom(socket) {
     io.to(roomId).emit("updateUserCount", numUsers);
   }
   if (strangerRoomId) {
+    console.log(
+      `Attempting to leave stranger room ${strangerRoomId} for user ${username}`
+    );
     socket.leave(strangerRoomId);
-    console.log(`${username} left room ${strangerRoomId}`);
-    socket.to(strangerRoomId).emit("userLeaved", { name: username });
-    const numUsers = io.sockets.adapter.rooms.get(roomId)?.size || 0;
-    io.to(strangerRoomId).emit("updateUserCount", numUsers);
+    console.log(`${username} left stranger room ${strangerRoomId}`);
+    socket.to(strangerRoomId).emit("strangerLeaved");
+    const numStrangerUsers =
+      io.sockets.adapter.rooms.get(strangerRoomId)?.size || 0;
+    io.to(strangerRoomId).emit("updateStrangerCount", numStrangerUsers);
   }
 }
 
